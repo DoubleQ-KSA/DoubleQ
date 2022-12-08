@@ -97,13 +97,12 @@ class VendorVatWizard(models.TransientModel):
                 amount_tax += move.amount_tax
                 amount_untaxed += move.amount_untaxed
                 total_discount += discount
-            worksheet.write_merge(row,row, 6,9, 'الاجمـــالــي', column_total_style)
+            worksheet.write_merge(row,row, 5,9, 'الاجمـــالــي', column_total_style)
             worksheet.write(row, 0, '', column_total_style)
             worksheet.write(row, 1, amount_total, column_total_style)
-            worksheet.write(row, 2, '0.00', column_total_style)
-            worksheet.write(row, 3, total_discount, column_total_style)
-            worksheet.write(row, 4, amount_tax, column_total_style)
-            worksheet.write(row, 5, amount_untaxed, column_total_style)
+            worksheet.write(row, 2, total_discount, column_total_style)
+            worksheet.write(row, 3, amount_tax, column_total_style)
+            worksheet.write(row, 4, amount_untaxed, column_total_style)
 
             for wizard in self:
                 fp = io.BytesIO()
