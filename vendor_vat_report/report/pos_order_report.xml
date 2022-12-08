@@ -4,7 +4,7 @@
 
         <record id="pos_order_report" model="ir.actions.report">
             <field name="name">POS Order</field>
-            <field name="model">account.move</field>
+            <field name="model">pos.order</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">vendor_vat_report.report_pos_template</field>
             <field name="report_file">vendor_vat_report.report_pos_template</field>
@@ -12,17 +12,179 @@
             <field name="binding_type">report</field>
         </record>
 
-        <template id="report_pos_template">
-            <t t-call="web.html_container">
-                <t t-call="web.internal_layout">
-                    <div class="page">
-                        <h2>TITLE FOR YOUR REPORT</h2>
+        <template id="report_pos_template_doc">
+            <t t-call="web.external_layout">
+                <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)"/>
+                <div class="row">
+                    <div class="col-auto col-4 mw-100 mb-4 text-center">
+                        <div t-field="doc.pos_reference"
+                             t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px'}"/>
+
+                        <span t-field="doc.pos_reference"/>
+
                     </div>
-                </t>
+                    <div class="col-auto col-8 mw-100 mb-8  text-center">
+<!--                        <t t-set="address">-->
+                    <div t-field="doc.partner_id"
+                         t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+<!--                </t>-->
+                    </div>
+                </div>
+<!--                <t t-set="address">-->
+<!--                    <div t-field="doc.partner_id"-->
+<!--                         t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>-->
+<!--                </t>-->
+                <div class="page">
+                    <div class="oe_structure"/>
+
+                    <h2 class="mt16">
+                        <span>Order #</span>
+                        <span t-field="doc.name"/>
+                    </h2>
+
+                    <div class="row mt32 mb32" id="informations">
+                        <div t-if="doc.session_id" class="col-auto col-3 mw-100 mb-2">
+                            <strong>Session:</strong>
+                            <p class="m-0" t-field="doc.session_id"/>
+                        </div>
+                        <div
+                                class="col-auto col-3 mw-100 mb-2">
+                            <strong>Order Date:</strong>
+                            <p class="m-0" t-field="doc.date_order"/>
+                        </div>
+
+                        <div t-if="doc.user_id.name" class="col-auto col-3 mw-100 mb-2">
+                            <strong>Salesperson:</strong>
+                            <p class="m-0" t-field="doc.user_id"/>
+                        </div>
+                    </div>
+
+                    <!-- Is there a discount on at least one line? -->
+
+                    <table class="table table-sm o_main_table">
+                        <!-- In case we want to repeat the header, remove "display: table-row-group" -->
+                        <thead style="display: table-row-group">
+                            <tr>
+                                <th name="th_description" class="text-left">Description</th>
+                                <th name="th_quantity" class="text-right">Quantity</th>
+                                <th name="th_priceunit" class="text-right">Unit Price</th>
+                                <th name="th_discount" class="text-right">
+                                    <span>Disc.%</span>
+                                </th>
+                                <th name="th_taxes" class="text-right">Taxes</th>
+                                <th name="th_subtotal" class="text-right">
+                                    <span groups="account.group_show_line_subtotals_tax_excluded">Amount</span>
+                                    <span groups="account.group_show_line_subtotals_tax_included">Total Price</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="sale_tbody">
+
+                            <t t-set="current_subtotal" t-value="0"/>
+
+                            <t t-foreach="doc.lines" t-as="line">
+
+                                <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal"
+                                   groups="account.group_show_line_subtotals_tax_excluded"/>
+                                <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal_incl"
+                                   groups="account.group_show_line_subtotals_tax_included"/>
+
+                                <tr>
+                                    <t>
+                                        <td name="td_name">
+                                            <span t-field="line.full_product_name"/>
+                                        </td>
+                                        <td name="td_quantity" class="text-right">
+                                            <span t-field="line.qty"/>
+                                        </td>
+                                        <td name="td_priceunit" class="text-right">
+                                            <span t-field="line.price_unit"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="line.discount"/>
+                                        </td>
+                                        <td name="td_taxes" class="text-right">
+                                            <span t-esc="', '.join(map(lambda x: (x.description or x.name), line.tax_ids_after_fiscal_position))"/>
+                                        </td>
+                                        <td name="td_subtotal" class="text-right o_price_total">
+                                            <span t-field="line.price_subtotal"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'
+                                                  groups="account.group_show_line_subtotals_tax_excluded"/>
+                                            <span t-field="line.price_subtotal_incl"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'
+                                                  groups="account.group_show_line_subtotals_tax_included"/>
+                                        </td>
+                                    </t>
+                                </tr>
+
+                                <t t-if="current_section and (line_last or doc.order_line[line_index+1].display_type == 'line_section')">
+                                    <tr class="is-subtotal text-right">
+                                        <td name="td_section_subtotal" colspan="99">
+                                            <strong class="mr16">Subtotal</strong>
+                                            <span
+                                                    t-esc="current_subtotal"
+                                                    t-options='{"widget": "monetary", "display_currency": doc.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <div class="clearfix" name="so_total_summary">
+                        <div id="total" class="row" name="total">
+                            <div t-attf-class="#{'col-4' if report_type != 'html' else 'col-sm-7 col-md-5'} ml-auto">
+                                <table class="table table-sm">
+                                    <!-- Tax totals -->
+                                    <t t-set="tax_totals" t-value="doc.amount_tax"/>
+                                    <tr class="border-black o_subtotal">
+                                        <td>
+                                            <strong>Taxes</strong>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-att-class="oe_subtotal_footer_separator"
+                                                  t-field="doc.amount_tax"
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr class="border-black o_subtotal">
+                                        <td>
+                                            <strong>Total</strong>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-att-class="oe_subtotal_footer_separator"
+                                                  t-field="doc.amount_total"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="oe_structure"/>
+
+                    <p t-field="doc.note"/>
+
+                    <p id="fiscal_position_remark"
+                       t-if="doc.fiscal_position_id and not is_html_empty(doc.fiscal_position_id.sudo().note)">
+                        <strong>Fiscal Position Remark:</strong>
+                        <span t-field="doc.fiscal_position_id.sudo().note"/>
+                    </p>
+                </div>
             </t>
         </template>
 
-
+        <template id="report_pos_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="vendor_vat_report.report_pos_template_doc" t-lang="doc.partner_id.lang"/>
+                </t>
+            </t>
+        </template>
 
     </data>
 </odoo>
