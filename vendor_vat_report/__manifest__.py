@@ -9,7 +9,7 @@
     'description': """
 """,
     'version': '1.0',
-    'depends': ['base','account','sale'],
+    'depends': ['base','account','sale','point_of_sale'],
     'data': [
         'security/ir.model.access.csv',
         'report/pos_order_report.xml',
