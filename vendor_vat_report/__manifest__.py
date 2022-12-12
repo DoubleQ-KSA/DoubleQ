@@ -16,6 +16,11 @@
         'views/vendor_vat_wizard_view.xml',
         'views/account_move_inherit_view.xml',
     ],
+    'assets': {
+        'point_of_sale.assets': [
+            'vendor_vat_report/static/src/js/ReceiptScreen.js',
+        ],
+    },
     'installable': True,
     'application': True,
     'auto_install': False,
