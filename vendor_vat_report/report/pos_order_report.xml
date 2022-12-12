@@ -32,13 +32,11 @@
 
                 <div class="header">
                     <div class="row" name="header_slogan">
-                        <div class="col-4 text-left">
-                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
-                        </div>
-                        <div class="col-4 text-center">
+                        <div class="col-12 text-center">
                             <img t-if="doc.company_id.logo" t-att-src="image_data_uri(doc.company_id.logo)"
                                  style="max-height: 120px;" alt="Logo"/>
                         </div>
+
                     </div>
                     <br/>
                     <div class="row">
@@ -261,7 +259,7 @@
                     </div>
                     <div class="row">
                         <div class="col-4"></div>
-                        <div class="col-4">
+                        <div class="col-4 text-center">
                             <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'%('QR', doc.l10n_sa_qr_code_str, 100, 100)"
                                  class="text-center"/>
                         </div>
