@@ -40,7 +40,7 @@
                     </div>
                     <br/>
                     <div class="row">
-                        <div class="col-6 text-center">
+                        <div class="col-6 text-left">
                             <h4 style="color: #ff0000;">
                                 فاتورة ضربية مبسطة
                             </h4>
@@ -48,7 +48,7 @@
                         <div class="col-3 text-right">
                             <h4 style="color: #ff0000;">Double,Q</h4>
                         </div>
-                        <div class="col-3 text-right">
+                        <div class="col-3 text-left">
                             <h4 style="color: #ff0000;">الجودة المضاعفة</h4>
                         </div>
 
@@ -102,15 +102,12 @@
                             <span style="color: #ff0000;">:</span>
                             <span style="color: #ff0000;">التاريخ</span>
                         </div>
-                        <div class="col-3 text-right">
+                        <div class="col-6 text-center">
                             <span>
                                 <span t-esc="doc.partner_id.name"/>
                             </span>
                         </div>
-                        <div class="col-3 text-center">
-                            <span style="color: #ff0000;">:</span>
-                            <span style="color: #ff0000;">العميل</span>
-                        </div>
+
 
                     </div>
                     <br/>
@@ -249,10 +246,10 @@
                      clear: both; display: block; font-size: 1px; min-height: 2px; line-height: 2; margin: 5px 0px;"/>
                     <div class="row">
 
-                        <div class="col-3 text-right">
+                        <div class="col-4 text-right">
                             <Strong>Vat Number /</Strong>
                         </div>
-                        <div class="col-5 text-center">
+                        <div class="col-4 text-left">
                             <span t-field="doc.company_id.vat"></span>
                         </div>
                         <div class="col-4"></div>
